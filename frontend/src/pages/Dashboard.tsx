@@ -11,7 +11,7 @@ export const Dashboard: React.FC = () => {
 
   if (!user) return null;
 
-  // Tourist does not need the business sidebar layout, they get a full dashboard layout directly
+  // Tourist does not need the business sidebar layout, they get a full dashboard layout directly.   
   if (user.role === 'tourist') {
     return <TouristDashboard />;
   }
