@@ -41,7 +41,7 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Core Services grid */}
+      {/* Core Services grid  */}
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
         <h2 className="text-2xl sm:text-3xl font-extrabold text-center text-slate-900 dark:text-white mb-12">
           An Integrated Four-Layer Ecosystem
