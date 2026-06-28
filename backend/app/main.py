@@ -8,7 +8,7 @@ from app.models.base import Base
 from app.api.v1 import auth, users, farms, homestays, marketplace, bookings, ai, analytics, reviews
 from app.db_seed import seed_database
 
-# Create database tables automatically on startup (helpful for quick SQLite testing and initial PG runs)
+#. Create database tables automatically on startup (helpful for quick SQLite testing and initial PG runs)
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
