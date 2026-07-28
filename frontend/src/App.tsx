@@ -23,6 +23,7 @@ import CartPage from './pages/marketplace/CartPage';
 import CheckoutPage from './pages/marketplace/CheckoutPage';
 import BookingManagementPage from './pages/bookings/BookingManagementPage';
 import ProfileSettingsPage from './pages/profile/ProfileSettingsPage';
+import AIAssistantPage from './pages/AIAssistantPage';
 
 function App() {
   return (
@@ -53,6 +54,14 @@ function App() {
                     element={
                       <ProtectedRoute>
                         <Dashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/ai-assistant"
+                    element={
+                      <ProtectedRoute>
+                        <AIAssistantPage />
                       </ProtectedRoute>
                     }
                   />

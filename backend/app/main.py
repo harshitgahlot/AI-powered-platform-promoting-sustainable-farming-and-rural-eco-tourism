@@ -5,11 +5,15 @@ from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 from app.core.database import engine, SessionLocal
 from app.models.base import Base
+from app import models  # Ensure all models are registered with Base metadata
 from app.api.v1 import auth, users, farms, homestays, marketplace, bookings, ai, analytics, reviews
 from app.db_seed import seed_database
 
-#. Create database tables automatically on startup (helpful for quick SQLite testing and initial PG runs)
-Base.metadata.create_all(bind=engine)
+# Create database tables automatically on startup
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception as e:
+    print(f"[DATABASE WARNING] Could not connect to database host to create tables: {e}")
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -19,9 +23,16 @@ app = FastAPI(
 )
 
 # Set up CORS middleware for React Vite app communication
+# NOTE: allow_origins=["*"] with allow_credentials=True is INVALID per CORS spec.
+# Browsers will reject responses. Explicit origins are required when credentials are used.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Adjust for production security, allow all for Docker network simplicity
+    allow_origins=[
+        "http://localhost:5173",   # Vite dev server
+        "http://localhost:3000",   # Alternate dev port
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:3000",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -44,12 +55,15 @@ app.include_router(analytics.router, prefix=f"{settings.API_V1_STR}/analytics", 
 
 @app.on_event("startup")
 def startup_db_seed():
-    db = SessionLocal()
     try:
-        # Seeds sample users, profiles, products, rooms, and bookings if empty
-        seed_database(db)
-    finally:
-        db.close()
+        db = SessionLocal()
+        try:
+            # Seeds sample users, profiles, products, rooms, and bookings if empty
+            seed_database(db)
+        finally:
+            db.close()
+    except Exception as e:
+        print(f"[DATABASE WARNING] Could not seed database: {e}")
 
 @app.get("/")
 def read_root():

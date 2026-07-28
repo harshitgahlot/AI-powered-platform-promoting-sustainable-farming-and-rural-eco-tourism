@@ -125,3 +125,34 @@ class AuthService:
             )
             
         return user
+
+    @staticmethod
+    def find_or_create_supabase_user(db: Session, email: str, full_name: str) -> Token:
+        user = UserRepository.get_by_email(db, email)
+        if not user:
+            # Create new user for Supabase auth
+            random_pwd = security.get_password_hash("SUPABASE_AUTH_USER_NOPASSWORD")
+            user = User(
+                email=email,
+                full_name=full_name or email.split("@")[0],
+                password_hash=random_pwd,
+                role="tourist"
+            )
+            UserRepository.create(db, user)
+            MarketplaceRepository.get_cart_by_user_id(db, user.id)
+
+        if user.is_suspended:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Your account has been suspended"
+            )
+
+        access_token = security.create_access_token(subject=user.id)
+        refresh_token = security.create_refresh_token(subject=user.id)
+
+        return Token(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            role=user.role
+        )
+

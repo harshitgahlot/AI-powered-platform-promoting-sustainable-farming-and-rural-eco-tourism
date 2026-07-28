@@ -51,5 +51,9 @@ export const authService = {
   suspendUser: async (id: number, isSuspended: boolean): Promise<User> => {
     const res = await api.put(`/users/${id}/suspend`, { is_suspended: isSuspended });
     return res.data;
+  },
+  supabaseSync: async (accessToken: string): Promise<{ access_token: string; refresh_token: string; role: string }> => {
+    const res = await api.post('/auth/supabase-sync', { access_token: accessToken });
+    return res.data;
   }
 };
