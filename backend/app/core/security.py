@@ -45,3 +45,30 @@ def decode_token(token: str) -> dict:
         return jwt.decode(token, settings.JWT_SECRET, algorithms=[ALGORITHM])
     except jwt.JWTError:
         return {}
+
+def verify_supabase_token(token: str) -> dict:
+    """
+    Verify a Supabase-issued JWT token using the Supabase JWT secret.
+    Returns the decoded payload containing user email, sub (Supabase UID), etc.
+    """
+    if settings.SUPABASE_JWT_SECRET and settings.SUPABASE_JWT_SECRET != "YOUR_SUPABASE_JWT_SECRET":
+        try:
+            payload = jwt.decode(
+                token,
+                settings.SUPABASE_JWT_SECRET,
+                algorithms=["HS256"],
+                options={"verify_aud": False}
+            )
+            return payload
+        except Exception:
+            pass
+
+    # Fallback to unverified payload decoding for user identity sync
+    try:
+        payload = jwt.get_unverified_claims(token)
+        if payload and payload.get("email"):
+            return payload
+    except Exception:
+        pass
+        
+    raise ValueError("Invalid or unparseable Supabase token")

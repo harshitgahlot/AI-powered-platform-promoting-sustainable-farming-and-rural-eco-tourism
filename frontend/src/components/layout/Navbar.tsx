@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -13,12 +13,32 @@ export const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     logout();
     setDropdownOpen(false);
     navigate('/');
   };
+
+  const isActive = (path: string) => {
+    if (path === '/') return location.pathname === '/';
+    return location.pathname.startsWith(path);
+  };
+
+  const getNavLinkClass = (path: string) =>
+    `text-sm transition-colors ${
+      isActive(path)
+        ? 'font-extrabold text-primary-600 dark:text-primary-400'
+        : 'font-bold text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400'
+    }`;
+
+  const getMobileNavLinkClass = (path: string) =>
+    `block px-3 py-2 rounded-xl text-base transition-colors hover:bg-slate-50 dark:hover:bg-slate-900 ${
+      isActive(path)
+        ? 'font-extrabold text-primary-600 dark:text-primary-400'
+        : 'font-bold text-slate-700 dark:text-slate-300'
+    }`;
 
   return (
     <nav className="sticky top-0 z-40 w-full border-b border-slate-200 dark:border-slate-800 glass transition-all">
@@ -34,15 +54,23 @@ export const Navbar: React.FC = () => {
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-6">
-            <Link to="/farms" className="text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+            <Link to="/" className={getNavLinkClass('/')}>
+              Home
+            </Link>
+            <Link to="/farms" className={getNavLinkClass('/farms')}>
               Farms
             </Link>
-            <Link to="/homestays" className="text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+            <Link to="/homestays" className={getNavLinkClass('/homestays')}>
               Homestays
             </Link>
-            <Link to="/marketplace" className="text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+            <Link to="/marketplace" className={getNavLinkClass('/marketplace')}>
               Marketplace
             </Link>
+            {isAuthenticated && (
+              <Link to="/ai-assistant" className={getNavLinkClass('/ai-assistant')}>
+                <span>AI Assistant</span>
+              </Link>
+            )}
 
             {/* Dark Mode Toggle */}
             <button
@@ -145,26 +173,42 @@ export const Navbar: React.FC = () => {
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-4 py-4 space-y-3">
           <Link
+            to="/"
+            onClick={() => setMobileMenuOpen(false)}
+            className={getMobileNavLinkClass('/')}
+          >
+            Home
+          </Link>
+          <Link
             to="/farms"
             onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 rounded-xl text-base font-bold hover:bg-slate-50 dark:hover:bg-slate-900"
+            className={getMobileNavLinkClass('/farms')}
           >
             Farms
           </Link>
           <Link
             to="/homestays"
             onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 rounded-xl text-base font-bold hover:bg-slate-50 dark:hover:bg-slate-900"
+            className={getMobileNavLinkClass('/homestays')}
           >
             Homestays
           </Link>
           <Link
             to="/marketplace"
             onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 rounded-xl text-base font-bold hover:bg-slate-50 dark:hover:bg-slate-900"
+            className={getMobileNavLinkClass('/marketplace')}
           >
             Marketplace
           </Link>
+          {isAuthenticated && (
+            <Link
+              to="/ai-assistant"
+              onClick={() => setMobileMenuOpen(false)}
+              className={getMobileNavLinkClass('/ai-assistant')}
+            >
+              AI Assistant
+            </Link>
+          )}
           {isAuthenticated && (
             <Link
               to="/cart"
